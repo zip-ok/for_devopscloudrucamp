@@ -1,0 +1,20 @@
+- name: Create new user
+  user:
+    name: "{{ username }}"
+    password: "{{ password | password_hash('sha512') }}"
+    state: present
+
+- name: Allow SSH access via key auth
+  authorized_key:
+    user: "{{ username }}"
+    key: "{{ pub_key }}"
+    state: present
+
+- name: Disable SSH login for root
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: '^#?PermitRootLogin'
+    line: 'PermitRootLogin no'
+    state: present
+  notify:
+    - restart sshd

@@ -1,0 +1,3 @@
+ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
+username: cloudru
+pub_key: "{{ lookup('file', 'roles/prepare/files/public_key.pub') }}"

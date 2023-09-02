@@ -1,0 +1,5 @@
+- name: for [Ubuntu Server 22.04.3] - the first cloudru exercise
+  hosts: for_cloudru
+  become: yes
+  roles:
+    - prepare

@@ -1,0 +1,14 @@
+---
+- name: Configure SSH access
+  include_tasks:
+    file: ssh_access.yml
+    apply:
+      tags: ssh_access
+  tags: ssh_access
+
+- name: Remove SSH access
+  include_tasks:
+    file: ssh_deny.yml
+    apply:
+      tags: ssh_deny
+  tags: ssh_deny

@@ -1,0 +1,17 @@
+- authorized_key:
+    user: "{{ username }}"
+    key: "{{ pub_key }}"
+    state: absent
+
+- user:
+    name: "{{ username }}"
+    password: "{{ password | password_hash('sha512') }}"
+    state: absent
+
+- lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: '^#?PermitRootLogin'
+    line: 'PermitRootLogin no'
+    state: absent
+  notify:
+    - restart sshd
