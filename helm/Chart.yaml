@@ -1,0 +1,8 @@
+name       : cloudru-chart
+description: helm chart for k8s
+version    : 3.12.3
+appVersion : 1.1.6
+
+maintainers:
+  - name : Denis Zaripov
+    email: den.zaripov.2006@mail.ru

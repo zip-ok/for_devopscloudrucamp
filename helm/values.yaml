@@ -1,0 +1,4 @@
+image: 192.168.1.6:5000/cloudru:latest
+minReplicaCount: 3
+maxReplicaCount: 7
+author: Denis

@@ -1,0 +1,104 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: helm-cloudru-ns
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudru-deployment
+  namespace: helm-cloudru-ns
+spec:
+  selector:
+    matchLabels:
+      app: cloudru-app
+  template:
+    metadata:
+      labels:
+        app: cloudru-app
+    spec:
+      containers:
+      - name: cloudru-container
+        image: {{ .Values.image }}
+        ports:
+        - containerPort: 8000
+        readinessProbe:
+          httpGet:
+            path: /id
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /id
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 20
+        env:
+        - name: UUID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.uid
+        - name: AUTHOR
+          value: {{ .Values.author }}
+      imagePullSecrets:
+      - name: cloudru-secret
+
+---
+
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: cloudru-autoscaling
+  namespace: helm-cloudru-ns
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: cloudru-deployment
+  minReplicas: {{ .Values.minReplicaCount }}
+  maxReplicas: {{ .Values.maxReplicaCount }}
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 90
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: cloudru-service
+  namespace: helm-cloudru-ns
+spec:
+  type: ClusterIP
+  selector:
+    app: cloudru-app
+  ports:
+  - protocol: TCP
+    port: 8000
+    targetPort: 8000
+
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cloudru-secret
+  namespace: helm-cloudru-ns
+type: kubernetes.io/dockerconfigjson
+data:
+  .dockerconfigjson: ewoJImF1dGhzIjogewoJCSJsb2NhbGhvc3Q6NTAwMCI6IHsKCQkJImF1dGgiOiAiWkdWdWVUcGtkMkZ6TVNFPSIKCQl9Cgl9Cn0=
+
+#apiVersion: v1
+#kind: Secret
+#metadata:
+#  name: cloudru-secret
+#type: Opaque
+#data:
+#  config.json: ewoJImF1dGhzIjogewoJCSJsb2NhbGhvc3Q6NTAwMCI6IHsKCQkJImF1dGgiOiAiWkdWdWVUcGtkMkZ6TVNFPSIKCQl9Cgl9Cn0=
